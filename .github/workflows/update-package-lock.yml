@@ -1,0 +1,60 @@
+name: Update Package Lock
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run monthly on the 1st at 3:15 AM UTC
+    - cron: '15 3 1 * *'
+
+jobs:
+  update-package-lock:
+    runs-on: ubuntu-latest
+    # ADDED: Permission configuration
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          # FIXED: Disable caching initially
+          # cache: 'npm'
+
+      - name: Verify package.json exists
+        working-directory: ./
+        run: |
+          if [ ! -f "./package.json" ];then
+            echo "Error: package.json not found in current directory"
+            ls -la
+            exit 1
+          fi
+          echo "package.json found successfully"
+
+      - name: Generate and update package-lock.json
+        working-directory: ./
+        run: |
+          echo "Updating dependencies and generating package-lock.json..."
+          npm install
+          echo "Dependencies updated successfully"
+          ls -la
+
+      # MODIFIED: Use a dedicated action for committing changes
+      - name: Commit and push if package-lock.json changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update package-lock.json for build consistency [automated]"
+          file_pattern: 'package-lock.json'
+          branch: main
+
+      - name: Test build after update
+        working-directory: ./
+        run: |
+          echo "Testing build after dependency update..."
+          npm run build
+          echo "Build test completed successfully"

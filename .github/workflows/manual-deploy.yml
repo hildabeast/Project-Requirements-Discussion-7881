@@ -1,0 +1,63 @@
+name: Manual Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  manual-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          # FIXED: Disable caching initially
+          # cache: 'npm'
+
+      - name: Generate package-lock.json first
+        working-directory: ./
+        run: |
+          echo "📝 Generating package-lock.json..."
+          npm install --package-lock-only
+          echo "✅ package-lock.json generated successfully"
+          ls -la
+
+      - name: Install dependencies
+        working-directory: ./
+        run: |
+          echo "📦 Installing dependencies..."
+          npm ci || npm install  # Fallback to npm install if npm ci fails
+          echo "✅ Dependencies installed successfully"
+
+      - name: Build project
+        working-directory: ./
+        run: |
+          echo "Building project for ${{github.event.inputs.environment}}..."
+          npm run build
+          echo "Build completed successfully"
+
+      - name: Deploy to deploy branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          publish_dir: ./dist
+          publish_branch: deploy
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Manual Deploy: ${{github.event.inputs.environment}} - ${{github.sha}}'

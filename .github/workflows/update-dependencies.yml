@@ -1,0 +1,40 @@
+name: Update Dependencies
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run monthly on the 1st at 3:15 AM UTC
+    - cron: '15 3 1 * *'
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Update dependencies
+        run: npm update
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update dependencies"
+          title: "chore: update dependencies"
+          body: |
+            This PR updates the project dependencies to their latest compatible versions.
+            
+            This is an automated PR created by the monthly dependency update workflow.
+          branch: "chore/update-dependencies"
+          base: "main"
+          labels: "dependencies,automated pr"

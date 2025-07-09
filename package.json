@@ -6,12 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:prod": "vite build --mode production",
     "lint": "eslint .",
-    "lint:error": "eslint . --quiet",
-    "preview": "vite preview",
-    "netlify:build": "npm run build",
-    "netlify:dev": "netlify dev"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@questlabs/react-sdk": "^2.1.9",
@@ -38,12 +34,7 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "vite": "^5.4.2",
-    "terser": "^5.29.1",
-    "netlify-cli": "^17.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yourusername/readysetgoteach-frontend-7881"
+    "terser": "^5.29.1"
   },
   "browserslist": [
     ">0.2%",
