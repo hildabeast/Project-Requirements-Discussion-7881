@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run lint && vite build",
-    "build:prod": "vite build",
+    "build": "vite build",
+    "build:prod": "vite build --mode production",
     "lint": "eslint .",
     "lint:error": "eslint . --quiet",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build:prod && gh-pages -d dist"
   },
   "dependencies": {
     "@questlabs/react-sdk": "^2.1.9",

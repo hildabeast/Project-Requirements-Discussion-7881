@@ -1,12 +1,15 @@
-import React from 'react'
-import { HashRouter as Router, Routes, Route } from 'react-router-dom'
-import Header from './components/Header'
-import Landing from './pages/Landing'
-import Courses from './pages/Courses'
-import LessonViewer from './pages/LessonViewer'
-import GiveLessonMode from './pages/GiveLessonMode'
+import React from 'react';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import Landing from './pages/Landing';
+import Courses from './pages/Courses';
+import LessonViewer from './pages/LessonViewer';
+import GiveLessonMode from './pages/GiveLessonMode';
+// Import CSS with explicit path
+import './App.css';
 
 function App() {
+  // Add error boundary for route-level errors
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -21,7 +24,7 @@ function App() {
         </main>
       </div>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

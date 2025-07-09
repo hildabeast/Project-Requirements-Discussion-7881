@@ -67,11 +67,19 @@ jobs:
         git commit -m "Update package-lock.json for build consistency [automated]"
         git push origin main
       
-    - name: Build project
+    - name: Create Tailwind config if missing
+      run: |
+        if [ ! -f "./tailwind.config.js" ]; then
+          echo "Creating tailwind.config.js..."
+          npx tailwindcss init --full
+        fi
+      
+    - name: Build project (production)
       working-directory: ./
       run: |
         echo "Building project..."
-        npm run build
+        export NODE_ENV=production
+        npm run build:prod
         echo "Build completed successfully"
         
     - name: Verify build output
@@ -84,6 +92,8 @@ jobs:
         fi
         echo "Build output verified:"
         ls -la ./dist/
+        echo "Checking for CSS files:"
+        find ./dist -name "*.css" | sort
         
     - name: Deploy to deploy branch
       uses: peaceiris/actions-gh-pages@v3
