@@ -4,8 +4,8 @@
   command = "npm ci && npm run build"
 
 [build.environment]
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
+  NODE_VERSION = "18.17.1"
+  NPM_VERSION = "9.6.7"
 
 # Prevent GitHub workflows from being processed
 [build.processing]
