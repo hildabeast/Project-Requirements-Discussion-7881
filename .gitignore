@@ -42,5 +42,9 @@ build/
 
 # Netlify
 .netlify/
+
 # Local Netlify folder
 .netlify
+
+# Keep package-lock.json for consistent builds
+# package-lock.json should NOT be in .gitignore
