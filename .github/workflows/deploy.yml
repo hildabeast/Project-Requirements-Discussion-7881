@@ -13,37 +13,78 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
+        cache-dependency-path: './package-lock.json'
+        
+    - name: Verify package.json exists
+      run: |
+        if [ ! -f "./package.json" ]; then
+          echo "Error: package.json not found in current directory"
+          ls -la
+          exit 1
+        fi
+        echo "package.json found successfully"
         
     - name: Install dependencies
-      run: npm ci || npm install
-      
+      working-directory: ./
+      run: |
+        if [ -f "./package-lock.json" ]; then
+          echo "package-lock.json found, running npm ci"
+          npm ci
+        else
+          echo "package-lock.json not found, running npm install"
+          npm install
+        fi
+        
     - name: Check if package-lock.json changed
       id: git-check
+      working-directory: ./
       run: |
-        if [[ -n $(git status --porcelain package-lock.json) ]]; then
-          echo "changed=true" >> $GITHUB_OUTPUT
-        else
+        git add package-lock.json
+        if git diff --staged --quiet package-lock.json; then
           echo "changed=false" >> $GITHUB_OUTPUT
+          echo "package-lock.json unchanged"
+        else
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "package-lock.json has changes"
         fi
       
     - name: Commit package-lock.json if changed
       if: steps.git-check.outputs.changed == 'true'
+      working-directory: ./
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add package-lock.json
-        git commit -m "Update package-lock.json for build consistency"
-        git push
+        git commit -m "Update package-lock.json for build consistency [automated]"
+        git push origin main
       
     - name: Build project
-      run: npm run build
-      
+      working-directory: ./
+      run: |
+        echo "Building project..."
+        npm run build
+        echo "Build completed successfully"
+        
+    - name: Verify build output
+      working-directory: ./
+      run: |
+        if [ ! -d "./dist" ]; then
+          echo "Error: dist directory not found after build"
+          ls -la
+          exit 1
+        fi
+        echo "Build output verified:"
+        ls -la ./dist/
+        
     - name: Deploy to deploy branch
       uses: peaceiris/actions-gh-pages@v3
       with:
@@ -53,3 +94,4 @@ jobs:
         force_orphan: true
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'Deploy: ${{ github.event.head_commit.message }}'

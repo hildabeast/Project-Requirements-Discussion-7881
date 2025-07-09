@@ -13,30 +13,60 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './package-lock.json'
+        
+    - name: Verify package.json exists
+      working-directory: ./
+      run: |
+        if [ ! -f "./package.json" ]; then
+          echo "Error: package.json not found in current directory"
+          ls -la
+          exit 1
+        fi
+        echo "package.json found successfully"
         
     - name: Update dependencies and package-lock.json
+      working-directory: ./
       run: |
+        echo "Updating dependencies..."
         npm install
+        echo "Dependencies updated successfully"
         
     - name: Check if package-lock.json changed
       id: git-check
+      working-directory: ./
       run: |
-        if [[ -n $(git status --porcelain package-lock.json) ]]; then
-          echo "changed=true" >> $GITHUB_OUTPUT
-        else
+        git add package-lock.json
+        if git diff --staged --quiet package-lock.json; then
           echo "changed=false" >> $GITHUB_OUTPUT
+          echo "package-lock.json unchanged"
+        else
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "package-lock.json has changes"
         fi
       
     - name: Commit package-lock.json if changed
       if: steps.git-check.outputs.changed == 'true'
+      working-directory: ./
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add package-lock.json
-        git commit -m "Update package-lock.json for build consistency [automated]"
-        git push
+        git commit -m "Update package-lock.json for build consistency [automated monthly update]"
+        git push origin main
+        
+    - name: Test build after update
+      working-directory: ./
+      run: |
+        echo "Testing build after dependency update..."
+        npm run build
+        echo "Build test completed successfully"

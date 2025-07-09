@@ -40,6 +40,24 @@ This project is configured for automatic deployment to Hostinger using GitHub Ac
 - **Automatic package-lock.json maintenance**: The workflow automatically commits any changes to package-lock.json
 - **Deterministic builds**: Ensures consistent dependencies across all environments
 - **Monthly dependency refresh**: Scheduled workflow updates dependencies on the 1st of each month
+- **Manual deployment**: Trigger deployments manually via GitHub Actions UI
+
+### Available Workflows:
+
+1. **Deploy to Hostinger** (`.github/workflows/deploy.yml`):
+   - Triggers on push to `main` branch
+   - Installs dependencies, builds project, and deploys to `deploy` branch
+   - Automatically commits package-lock.json changes
+
+2. **Update Package Lock** (`.github/workflows/update-package-lock.yml`):
+   - Runs monthly on the 1st
+   - Can be triggered manually
+   - Updates dependencies and commits package-lock.json changes
+
+3. **Manual Deploy** (`.github/workflows/manual-deploy.yml`):
+   - Trigger via GitHub Actions UI
+   - Choose environment (production/staging)
+   - Immediate deployment without waiting for push
 
 ### Manual Deployment:
 
@@ -55,6 +73,12 @@ npm run deploy
 3. Set the branch to `deploy`
 4. Set the public folder to the root (`/`) since the build outputs directly to the deploy branch
 5. Enable automatic deployment
+
+### Troubleshooting:
+
+- **Build fails**: Check that all dependencies are properly installed and package-lock.json is up to date
+- **Deployment fails**: Verify the `deploy` branch exists and Hostinger is configured correctly
+- **Missing files**: Ensure all source files are committed to the `main` branch
 
 ## Build Configuration
 
