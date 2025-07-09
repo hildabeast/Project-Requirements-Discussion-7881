@@ -7,6 +7,10 @@
   NODE_VERSION = "18"
   NPM_VERSION = "9"
 
+# Prevent GitHub workflows from being processed
+[build.processing]
+  skip_processing = true
+
 [context.production]
   command = "npm ci && npm run build"
   

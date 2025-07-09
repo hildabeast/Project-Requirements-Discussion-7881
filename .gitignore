@@ -7,6 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Explicitly ignore GitHub workflows
+.github/
+.github/workflows/
+.github/workflows/*.yml
+
+# Dependency directories
 node_modules
 dist
 dist-ssr
@@ -36,6 +42,5 @@ build/
 
 # Netlify
 .netlify/
-
 # Local Netlify folder
 .netlify
