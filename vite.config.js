@@ -10,8 +10,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     }
   },
-   build: {
+  build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
   },
+  define: {
+    'process.env.VITE_APP_NAME': JSON.stringify('readysetgoteach-frontend-7881'),
+  }
 });
