@@ -1,13 +1,13 @@
-name: Deploy to Hostinger
+name: Update Package Lock
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    # Run monthly on the 1st at 3:15 AM UTC
+    - cron: '15 3 1 * *'
 
 jobs:
-  build-and-deploy:
+  update-package-lock:
     runs-on: ubuntu-latest
     
     steps:
@@ -18,11 +18,11 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
         
-    - name: Install dependencies
-      run: npm ci || npm install
-      
+    - name: Update dependencies and package-lock.json
+      run: |
+        npm install
+        
     - name: Check if package-lock.json changed
       id: git-check
       run: |
@@ -38,18 +38,5 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add package-lock.json
-        git commit -m "Update package-lock.json for build consistency"
+        git commit -m "Update package-lock.json for build consistency [automated]"
         git push
-      
-    - name: Build project
-      run: npm run build
-      
-    - name: Deploy to deploy branch
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
-        publish_branch: deploy
-        force_orphan: true
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'

@@ -35,6 +35,12 @@ This project is configured for automatic deployment to Hostinger using GitHub Ac
 2. **Hostinger Configuration**: Point your Hostinger hosting to pull from the `deploy` branch
 3. **Automatic Deployment**: Every push to `main` triggers a build and deployment to the `deploy` branch
 
+### CI/CD Features:
+
+- **Automatic package-lock.json maintenance**: The workflow automatically commits any changes to package-lock.json
+- **Deterministic builds**: Ensures consistent dependencies across all environments
+- **Monthly dependency refresh**: Scheduled workflow updates dependencies on the 1st of each month
+
 ### Manual Deployment:
 
 ```bash
