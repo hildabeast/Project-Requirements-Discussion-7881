@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- FIXED: Use relative path for favicon -->
+    <!-- FIXED: Changed absolute path to relative path for favicon -->
     <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     
     <!-- SEO and Meta Tags -->
@@ -35,17 +34,8 @@
     <!-- Critical CSS inline to prevent FOUC -->
     <style>
       /* Reset and base styles */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      
-      html {
-        font-size: 16px;
-        line-height: 1.5;
-      }
-      
+      * {margin: 0; padding: 0; box-sizing: border-box;}
+      html {font-size: 16px; line-height: 1.5;}
       body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
@@ -53,75 +43,39 @@
         background-color: #f9fafb;
         color: #111827;
       }
-      
-      #root {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
+      #root {min-height: 100vh; display: flex; flex-direction: column;}
       
       /* Loading state styles */
-      .loading-container {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        background-color: #f9fafb;
-      }
-      
-      .loading-content {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      .loading-inner {
-        text-align: center;
-        padding: 2rem;
-      }
-      
+      .loading-container {min-height: 100vh; display: flex; flex-direction: column; background-color: #f9fafb;}
+      .loading-content {flex: 1; display: flex; align-items: center; justify-content: center;}
+      .loading-inner {text-align: center; padding: 2rem;}
       .loading-spinner {
-        width: 2rem;
-        height: 2rem;
+        width: 2rem; height: 2rem;
         border: 2px solid #e5e7eb;
         border-top: 2px solid #2563eb;
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin: 0 auto 1rem;
       }
+      .loading-text {color: #6b7280; font-size: 1rem; animation: pulse 2s ease-in-out infinite;}
       
-      .loading-text {
-        color: #6b7280;
-        font-size: 1rem;
-        animation: pulse 2s ease-in-out infinite;
-      }
-      
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-      }
+      @keyframes spin {0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);}}
+      @keyframes pulse {0%, 100% {opacity: 1;} 50% {opacity: 0.5;}}
       
       /* Utility classes for critical layout */
-      .min-h-screen { min-height: 100vh; }
-      .flex { display: flex; }
-      .flex-col { flex-direction: column; }
-      .flex-1 { flex: 1 1 0%; }
-      .items-center { align-items: center; }
-      .justify-center { justify-content: center; }
-      .text-center { text-align: center; }
-      .bg-gray-50 { background-color: #f9fafb; }
-      .text-gray-600 { color: #4b5563; }
-      .p-8 { padding: 2rem; }
+      .min-h-screen {min-height: 100vh;}
+      .flex {display: flex;}
+      .flex-col {flex-direction: column;}
+      .flex-1 {flex: 1 1 0%;}
+      .items-center {align-items: center;}
+      .justify-center {justify-content: center;}
+      .text-center {text-align: center;}
+      .bg-gray-50 {background-color: #f9fafb;}
+      .text-gray-600 {color: #4b5563;}
+      .p-8 {padding: 2rem;}
       
       /* Hide loading content once app loads */
-      .app-loaded .loading-container {
-        display: none;
-      }
+      .app-loaded .loading-container {display: none;}
     </style>
   </head>
   <body>
@@ -136,8 +90,7 @@
         </div>
       </div>
     </div>
-    
-    <!-- FIXED: Use relative path for main script -->
+    <!-- FIXED: Changed absolute path to relative path for main script -->
     <script type="module" src="./src/main.jsx"></script>
   </body>
 </html>

@@ -6,7 +6,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   
-  // CRITICAL: Set base to './' for relative asset paths on static hosts
+  // FIXED: Ensure base path is set to relative
   base: './',
   
   resolve: {
@@ -71,15 +71,8 @@ export default defineConfig({
     }
   },
   
-  // Configure CSS processing
-  css: {
-    postcss: {
-      plugins: [
-        require('tailwindcss'),
-        require('autoprefixer')
-      ]
-    }
-  },
+  // FIXED: Remove CSS configuration that causes dynamic require issues
+  // PostCSS will be handled by postcss.config.js instead
   
   // Environment variables for production
   define: {
