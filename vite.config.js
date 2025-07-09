@@ -12,7 +12,18 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false,
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['framer-motion', 'react-icons'],
+          supabase: ['@supabase/supabase-js']
+        }
+      }
+    }
   },
   define: {
     'process.env.VITE_APP_NAME': JSON.stringify('readysetgoteach-frontend-7881'),
