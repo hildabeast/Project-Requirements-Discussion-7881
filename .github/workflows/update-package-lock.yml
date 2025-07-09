@@ -9,6 +9,9 @@ on:
 jobs:
   update-package-lock:
     runs-on: ubuntu-latest
+    # ADDED: Permission configuration
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,28 +44,13 @@ jobs:
           echo "Dependencies updated successfully"
           ls -la
 
-      - name: Check if package-lock.json changed
-        id: git-check
-        working-directory: ./
-        run: |
-          git add package-lock.json
-          if git diff --staged --quiet package-lock.json;then
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "package-lock.json unchanged"
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "package-lock.json has changes"
-          fi
-
-      - name: Commit package-lock.json if changed
-        if: steps.git-check.outputs.changed=='true'
-        working-directory: ./
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add package-lock.json
-          git commit -m "Update package-lock.json for build consistency [automated monthly update]"
-          git push origin main
+      # MODIFIED: Use a dedicated action for committing changes
+      - name: Commit and push if package-lock.json changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update package-lock.json for build consistency [automated]"
+          file_pattern: 'package-lock.json'
+          branch: main
 
       - name: Test build after update
         working-directory: ./

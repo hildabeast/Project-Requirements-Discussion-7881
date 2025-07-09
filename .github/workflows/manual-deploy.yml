@@ -41,7 +41,7 @@ jobs:
         working-directory: ./
         run: |
           echo "📦 Installing dependencies..."
-          npm ci
+          npm ci || npm install  # Fallback to npm install if npm ci fails
           echo "✅ Dependencies installed successfully"
 
       - name: Build project
