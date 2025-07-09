@@ -9,175 +9,173 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: 'package-lock.json'
-        
-    - name: Verify package.json exists
-      run: |
-        if [ ! -f "./package.json" ]; then
-          echo "Error: package.json not found in current directory"
-          ls -la
-          exit 1
-        fi
-        echo "✅ package.json found successfully"
-        
-    - name: Install dependencies
-      run: |
-        echo "📦 Installing dependencies..."
-        if [ -f "./package-lock.json" ]; then
-          echo "Using npm ci for faster, reliable installs"
-          npm ci
-        else
-          echo "Using npm install"
-          npm install
-        fi
-        echo "✅ Dependencies installed successfully"
-        
-    - name: Generate package-lock.json if missing
-      run: |
-        if [ ! -f "./package-lock.json" ]; then
-          echo "📝 Generating package-lock.json..."
-          npm install --package-lock-only
-          echo "✅ package-lock.json generated successfully"
-        else
-          echo "✅ package-lock.json already exists"
-        fi
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          # FIXED: Remove the cache-dependency-path parameter
+          cache: 'npm'
       
-    - name: Check if package-lock.json changed
-      id: git-check
-      run: |
-        git add package-lock.json
-        if git diff --staged --quiet package-lock.json; then
-          echo "changed=false" >> $GITHUB_OUTPUT
-          echo "✅ package-lock.json unchanged"
-        else
-          echo "changed=true" >> $GITHUB_OUTPUT
-          echo "📝 package-lock.json has changes"
-        fi
+      - name: Verify package.json exists
+        run: |
+          if [ ! -f "./package.json" ];then
+            echo "Error: package.json not found in current directory"
+            ls -la
+            exit 1
+          fi
+          echo "✅ package.json found successfully"
       
-    - name: Commit package-lock.json if changed
-      if: steps.git-check.outputs.changed == 'true'
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        git add package-lock.json
-        git commit -m "Update package-lock.json for build consistency [automated]"
-        git push origin main
+      - name: Install dependencies
+        run: |
+          echo "📦 Installing dependencies..."
+          if [ -f "./package-lock.json" ];then
+            echo "Using npm ci for faster, reliable installs"
+            npm ci
+          else
+            echo "Using npm install"
+            npm install
+          fi
+          echo "✅ Dependencies installed successfully"
       
-    - name: Build project (production)
-      run: |
-        echo "🔨 Building project for production..."
-        export NODE_ENV=production
-        npm run build
-        echo "✅ Build completed successfully"
-        
-    - name: Verify build output and assets
-      run: |
-        echo "🔍 Verifying build output..."
-        
-        # Check if dist directory exists
-        if [ ! -d "./dist" ]; then
-          echo "❌ Error: dist directory not found after build"
-          ls -la
-          exit 1
-        fi
-        
-        # Check for index.html
-        if [ ! -f "./dist/index.html" ]; then
-          echo "❌ Error: index.html not found in dist directory"
-          ls -la ./dist
-          exit 1
-        fi
-        
-        # Check for vite.svg (favicon)
-        if [ ! -f "./dist/vite.svg" ]; then
-          echo "❌ Error: vite.svg (favicon) not found in dist directory"
-          ls -la ./dist
-          exit 1
-        fi
-        
-        # Check for CSS files
-        CSS_FILES=$(find ./dist -name "*.css" | wc -l)
-        if [ "$CSS_FILES" -eq 0 ]; then
-          echo "❌ Error: No CSS files found in dist directory"
-          find ./dist -type f | sort
-          exit 1
-        fi
-        
-        # Check for JS files
-        JS_FILES=$(find ./dist -name "*.js" | wc -l)
-        if [ "$JS_FILES" -eq 0 ]; then
-          echo "❌ Error: No JS files found in dist directory"
-          find ./dist -type f | sort
-          exit 1
-        fi
-        
-        echo "✅ Build output verified successfully:"
-        echo "📁 Directory structure:"
-        ls -la ./dist/
-        echo ""
-        echo "🎨 CSS files found:"
-        find ./dist -name "*.css" | sort
-        echo ""
-        echo "⚡ JS files found:"
-        find ./dist -name "*.js" | sort
-        echo ""
-        echo "🖼️ Asset files found:"
-        find ./dist -name "*.svg" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.ico" | sort
-        echo ""
-        
-        # Verify index.html content and asset references
-        echo "🔍 Checking index.html for asset references..."
-        if grep -q "href=\"\./vite\.svg\"" ./dist/index.html; then
-          echo "✅ Favicon reference is correct (relative path)"
-        else
-          echo "⚠️ Warning: Favicon reference may be incorrect"
-        fi
-        
-        if grep -q "src=\"\./assets/" ./dist/index.html; then
-          echo "✅ Asset references use relative paths"
-        else
-          echo "⚠️ Warning: Asset references may not use relative paths"
-        fi
-        
-        # Display index.html content for debugging
-        echo ""
-        echo "📄 Contents of index.html:"
-        echo "=========================="
-        cat ./dist/index.html
-        echo "=========================="
-        
-    - name: Deploy to deploy branch
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
-        publish_branch: deploy
-        force_orphan: true
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
-        commit_message: '🚀 Deploy: ${{ github.event.head_commit.message }}'
-        
-    - name: Deployment Summary
-      run: |
-        echo "🎉 Deployment completed successfully!"
-        echo "📊 Build Summary:"
-        echo "- CSS files: $(find ./dist -name "*.css" | wc -l)"
-        echo "- JS files: $(find ./dist -name "*.js" | wc -l)"
-        echo "- Asset files: $(find ./dist/assets -type f 2>/dev/null | wc -l)"
-        echo "- Total files: $(find ./dist -type f | wc -l)"
-        echo ""
-        echo "🌐 Your app should now be available on Hostinger!"
-        echo "🔗 Make sure your Hostinger hosting points to the 'deploy' branch"
+      - name: Generate package-lock.json if missing
+        run: |
+          if [ ! -f "./package-lock.json" ];then
+            echo "📝 Generating package-lock.json..."
+            npm install --package-lock-only
+            echo "✅ package-lock.json generated successfully"
+          else
+            echo "✅ package-lock.json already exists"
+          fi
+      
+      - name: Check if package-lock.json changed
+        id: git-check
+        run: |
+          git add package-lock.json
+          if git diff --staged --quiet package-lock.json;then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "✅ package-lock.json unchanged"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "📝 package-lock.json has changes"
+          fi
+      
+      - name: Commit package-lock.json if changed
+        if: steps.git-check.outputs.changed=='true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add package-lock.json
+          git commit -m "Update package-lock.json for build consistency [automated]"
+          git push origin main
+      
+      - name: Build project (production)
+        run: |
+          echo "🔨 Building project for production..."
+          export NODE_ENV=production
+          npm run build
+          echo "✅ Build completed successfully"
+      
+      - name: Verify build output and assets
+        run: |
+          echo "🔍 Verifying build output..."
+          # Check if dist directory exists
+          if [ ! -d "./dist" ];then
+            echo "❌ Error: dist directory not found after build"
+            ls -la
+            exit 1
+          fi
+          
+          # Check for index.html
+          if [ ! -f "./dist/index.html" ];then
+            echo "❌ Error: index.html not found in dist directory"
+            ls -la ./dist
+            exit 1
+          fi
+          
+          # Check for vite.svg (favicon)
+          if [ ! -f "./dist/vite.svg" ];then
+            echo "❌ Error: vite.svg (favicon) not found in dist directory"
+            ls -la ./dist
+            exit 1
+          fi
+          
+          # Check for CSS files
+          CSS_FILES=$(find ./dist -name "*.css" | wc -l)
+          if [ "$CSS_FILES" -eq 0 ];then
+            echo "❌ Error: No CSS files found in dist directory"
+            find ./dist -type f | sort
+            exit 1
+          fi
+          
+          # Check for JS files
+          JS_FILES=$(find ./dist -name "*.js" | wc -l)
+          if [ "$JS_FILES" -eq 0 ];then
+            echo "❌ Error: No JS files found in dist directory"
+            find ./dist -type f | sort
+            exit 1
+          fi
+          
+          echo "✅ Build output verified successfully:"
+          echo "📁 Directory structure:"
+          ls -la ./dist/
+          echo ""
+          echo "🎨 CSS files found:"
+          find ./dist -name "*.css" | sort
+          echo ""
+          echo "⚡ JS files found:"
+          find ./dist -name "*.js" | sort
+          echo ""
+          echo "🖼️ Asset files found:"
+          find ./dist -name "*.svg" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.ico" | sort
+          echo ""
+          
+          # Verify index.html content and asset references
+          echo "🔍 Checking index.html for asset references..."
+          if grep -q "href=\"\./vite\.svg\"" ./dist/index.html;then
+            echo "✅ Favicon reference is correct (relative path)"
+          else
+            echo "⚠️ Warning: Favicon reference may be incorrect"
+          fi
+          
+          if grep -q "src=\"\./assets/" ./dist/index.html;then
+            echo "✅ Asset references use relative paths"
+          else
+            echo "⚠️ Warning: Asset references may not use relative paths"
+          fi
+          
+          # Display index.html content for debugging
+          echo ""
+          echo "📄 Contents of index.html:"
+          echo "=========================="
+          cat ./dist/index.html
+          echo "=========================="
+      
+      - name: Deploy to deploy branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          publish_dir: ./dist
+          publish_branch: deploy
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: '🚀 Deploy: ${{github.event.head_commit.message}}'
+      
+      - name: Deployment Summary
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo "📊 Build Summary:"
+          echo "- CSS files: $(find ./dist -name "*.css" | wc -l)"
+          echo "- JS files: $(find ./dist -name "*.js" | wc -l)"
+          echo "- Asset files: $(find ./dist/assets -type f 2>/dev/null | wc -l)"
+          echo "- Total files: $(find ./dist -type f | wc -l)"
+          echo ""
+          echo "🌐 Your app should now be available on Hostinger!"
+          echo "🔗 Make sure your Hostinger hosting points to the 'deploy' branch"
