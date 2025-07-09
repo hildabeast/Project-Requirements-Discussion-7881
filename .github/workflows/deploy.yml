@@ -21,8 +21,9 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
+        # FIXED: Ensure cache-dependency-path is correct and exists
         cache: 'npm'
-        cache-dependency-path: './package-lock.json'
+        cache-dependency-path: 'package-lock.json'
         
     - name: Verify package.json exists
       run: |
@@ -34,19 +35,31 @@ jobs:
         echo "package.json found successfully"
         
     - name: Install dependencies
-      working-directory: ./
+      # FIXED: Use more reliable dependency installation
       run: |
+        echo "Installing dependencies..."
+        # First check if we have a package-lock.json
         if [ -f "./package-lock.json" ]; then
-          echo "package-lock.json found, running npm ci"
+          echo "Found package-lock.json, using npm ci for faster, reliable installs"
           npm ci
         else
-          echo "package-lock.json not found, running npm install"
+          echo "No package-lock.json found, using npm install"
           npm install
         fi
         
+    - name: Generate package-lock.json if missing
+      # FIXED: Ensure package-lock.json exists for caching
+      run: |
+        if [ ! -f "./package-lock.json" ]; then
+          echo "Generating package-lock.json..."
+          npm install --package-lock-only
+          echo "package-lock.json generated successfully"
+        else
+          echo "package-lock.json already exists"
+        fi
+      
     - name: Check if package-lock.json changed
       id: git-check
-      working-directory: ./
       run: |
         git add package-lock.json
         if git diff --staged --quiet package-lock.json; then
@@ -59,7 +72,6 @@ jobs:
       
     - name: Commit package-lock.json if changed
       if: steps.git-check.outputs.changed == 'true'
-      working-directory: ./
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
@@ -67,33 +79,70 @@ jobs:
         git commit -m "Update package-lock.json for build consistency [automated]"
         git push origin main
       
-    - name: Create Tailwind config if missing
+    - name: Setup Tailwind
+      # FIXED: Ensure Tailwind is properly installed
       run: |
+        echo "Setting up Tailwind CSS..."
         if [ ! -f "./tailwind.config.js" ]; then
           echo "Creating tailwind.config.js..."
-          npx tailwindcss init --full
+          npx tailwindcss init
+          
+          # Update content property in tailwind.config.js
+          sed -i 's|content: \[\],|content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],|g' tailwind.config.js
+        fi
+        
+        # Ensure PostCSS config exists
+        if [ ! -f "./postcss.config.js" ]; then
+          echo "Creating postcss.config.js..."
+          echo "export default { plugins: { tailwindcss: {}, autoprefixer: {} } }" > postcss.config.js
         fi
       
     - name: Build project (production)
-      working-directory: ./
+      # FIXED: Use npm run build for consistency
       run: |
         echo "Building project..."
         export NODE_ENV=production
-        npm run build:prod
+        npm run build
         echo "Build completed successfully"
         
     - name: Verify build output
-      working-directory: ./
+      # FIXED: More comprehensive build verification
       run: |
         if [ ! -d "./dist" ]; then
           echo "Error: dist directory not found after build"
           ls -la
           exit 1
         fi
+        
+        # Check for index.html
+        if [ ! -f "./dist/index.html" ]; then
+          echo "Error: index.html not found in dist directory"
+          ls -la ./dist
+          exit 1
+        fi
+        
+        # Check for CSS files
+        CSS_FILES=$(find ./dist -name "*.css" | wc -l)
+        if [ "$CSS_FILES" -eq 0 ]; then
+          echo "Error: No CSS files found in dist directory"
+          find ./dist -type f | sort
+          exit 1
+        fi
+        
         echo "Build output verified:"
         ls -la ./dist/
-        echo "Checking for CSS files:"
+        echo "CSS files found:"
         find ./dist -name "*.css" | sort
+        echo "JS files found:"
+        find ./dist -name "*.js" | sort
+        
+        # Check index.html for correct asset paths
+        echo "Checking index.html for correct asset paths..."
+        grep -o "assets/[^\"']*" ./dist/index.html || echo "No asset references found in index.html"
+        
+        # Display the contents of index.html for debugging
+        echo "Contents of index.html:"
+        cat ./dist/index.html
         
     - name: Deploy to deploy branch
       uses: peaceiris/actions-gh-pages@v3

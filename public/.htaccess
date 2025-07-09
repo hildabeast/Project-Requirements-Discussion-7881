@@ -1,10 +1,31 @@
 <IfModule mod_rewrite.c>
+  # Enable rewriting
   RewriteEngine On
   RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+  
+  # Don't rewrite files or directories
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  
+  # Set correct MIME types
+  <FilesMatch "\.js$">
+    ForceType application/javascript
+  </FilesMatch>
+  
+  <FilesMatch "\.css$">
+    ForceType text/css
+  </FilesMatch>
+  
+  # Serve gzipped file if it exists and the client accepts gzip
+  <IfModule mod_headers.c>
+    <FilesMatch "\.(js|css|html)$">
+      Header append Vary Accept-Encoding
+    </FilesMatch>
+  </IfModule>
+  
+  # Rewrite everything else to index.html to allow SPA routing
+  RewriteRule ^ index.html [L]
 </IfModule>
 
 # Enable compression
@@ -33,4 +54,11 @@
   ExpiresByType image/x-icon "access plus 1 year"
   ExpiresByType application/pdf "access plus 1 month"
   ExpiresByType application/x-shockwave-flash "access plus 1 month"
+</IfModule>
+
+# CORS Headers
+<IfModule mod_headers.c>
+  <FilesMatch "\.(ttf|ttc|otf|eot|woff|woff2|font\.css|css|js)$">
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
 </IfModule>
