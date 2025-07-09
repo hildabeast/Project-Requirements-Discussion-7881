@@ -36,3 +36,6 @@ build/
 
 # Deployment
 .gh-pages
+
+# NOTE: package-lock.json is intentionally NOT ignored
+# It should be committed to ensure consistent installs
