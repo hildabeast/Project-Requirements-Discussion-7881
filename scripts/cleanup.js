@@ -15,7 +15,6 @@ console.log('⚙️ Pre-build cleanup script running...');
 // Check if the GitHub workflows directory exists
 if (fs.existsSync(workflowsDir)) {
   console.log('🗑️ Removing GitHub Actions workflows directory...');
-  
   try {
     // Get all files in the workflows directory
     const files = fs.readdirSync(workflowsDir);
@@ -40,10 +39,10 @@ if (fs.existsSync(workflowsDir)) {
         console.log('✅ Deleted empty .github directory');
       }
     }
-    
   } catch (err) {
     console.error('❌ Error during cleanup:', err);
-    // Don't fail the build
+    // Don't fail the build process
+    process.exit(0);
   }
 } else {
   console.log('ℹ️ No GitHub workflows directory found. Skipping cleanup.');

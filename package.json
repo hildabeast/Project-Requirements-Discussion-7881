@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/cleanup.js",
-    "build": "vite build",
+    "build": "npx vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

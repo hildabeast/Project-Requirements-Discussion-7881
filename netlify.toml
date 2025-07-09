@@ -1,7 +1,7 @@
 [build]
   base = "."
   publish = "dist"
-  command = "npm install && npm run build"
+  command = "npm ci && npm run build"
 
 [build.environment]
   NODE_VERSION = "20.10.0"
@@ -12,18 +12,18 @@
   skip_processing = true
 
 [context.production]
-  command = "npm install && npm run build"
+  command = "npm ci && npm run build"
   
 [context.production.environment]
   NODE_ENV = "production"
   NODE_VERSION = "20.10.0"
 
 [context.deploy-preview]
-  command = "npm install && npm run build"
+  command = "npm ci && npm run build"
   NODE_VERSION = "20.10.0"
 
 [context.branch-deploy]
-  command = "npm install && npm run build"
+  command = "npm ci && npm run build"
   NODE_VERSION = "20.10.0"
 
 # SPA redirect for React Router
