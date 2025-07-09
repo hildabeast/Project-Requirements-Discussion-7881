@@ -1,10 +1,11 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import {HashRouter as Router, Routes, Route} from 'react-router-dom';
 import Header from './components/Header';
 import Landing from './pages/Landing';
 import Courses from './pages/Courses';
 import LessonViewer from './pages/LessonViewer';
 import GiveLessonMode from './pages/GiveLessonMode';
+
 // Import CSS with explicit path
 import './App.css';
 

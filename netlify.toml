@@ -4,8 +4,8 @@
   command = "npm install && npm run build"
 
 [build.environment]
-  NODE_VERSION = "18.17.1"
-  NPM_VERSION = "9.6.7"
+  NODE_VERSION = "20.11.1"
+  NPM_VERSION = "10.2.4"
 
 # Prevent GitHub workflows from being processed
 [build.processing]
@@ -16,12 +16,15 @@
   
 [context.production.environment]
   NODE_ENV = "production"
+  NODE_VERSION = "20.11.1"
 
 [context.deploy-preview]
   command = "npm install && npm run build"
+  NODE_VERSION = "20.11.1"
 
 [context.branch-deploy]
   command = "npm install && npm run build"
+  NODE_VERSION = "20.11.1"
 
 # SPA redirect for React Router
 [[redirects]]
