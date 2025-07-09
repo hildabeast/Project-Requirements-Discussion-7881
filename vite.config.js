@@ -6,7 +6,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   
-  // FIXED: Ensure base path is set to relative
+  // Base path for Netlify (use relative paths)
   base: './',
   
   resolve: {
@@ -17,9 +17,8 @@ export default defineConfig({
   
   build: {
     outDir: 'dist',
-    
-    // Generate sourcemaps for debugging
-    sourcemap: false, // Disable in production for smaller files
+    // Generate sourcemaps for debugging (can be disabled in production)
+    sourcemap: false,
     
     // Ensure CSS is properly extracted
     cssCodeSplit: true,
@@ -27,7 +26,7 @@ export default defineConfig({
     // Use terser for better minification
     minify: 'terser',
     
-    // Configure asset handling for static hosting
+    // Configure asset handling for Netlify
     assetsDir: 'assets',
     
     // Ensure proper asset inlining thresholds
@@ -36,7 +35,7 @@ export default defineConfig({
     // Configure Rollup options for better asset handling
     rollupOptions: {
       output: {
-        // FIXED: Use consistent naming pattern for static hosting
+        // Consistent naming pattern for Netlify
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.');
           const ext = info[info.length - 1];
@@ -70,9 +69,6 @@ export default defineConfig({
       }
     }
   },
-  
-  // FIXED: Remove CSS configuration that causes dynamic require issues
-  // PostCSS will be handled by postcss.config.js instead
   
   // Environment variables for production
   define: {

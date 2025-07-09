@@ -34,8 +34,8 @@ dist-ssr
 build/
 .cache/
 
-# Deployment
-.gh-pages
+# Netlify
+.netlify/
 
-# NOTE: package-lock.json is intentionally NOT ignored
-# It should be committed to ensure consistent installs
+# Local Netlify folder
+.netlify
