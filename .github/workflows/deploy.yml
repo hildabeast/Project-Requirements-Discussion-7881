@@ -20,8 +20,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          # FIXED: Remove the cache-dependency-path parameter
-          cache: 'npm'
+          # FIXED: Disable caching until we have a lock file
+          # cache: 'npm'
       
       - name: Verify package.json exists
         run: |
@@ -32,27 +32,18 @@ jobs:
           fi
           echo "✅ package.json found successfully"
       
+      - name: Generate package-lock.json first
+        run: |
+          echo "📝 Generating package-lock.json..."
+          npm install --package-lock-only
+          echo "✅ package-lock.json generated successfully"
+          ls -la
+      
       - name: Install dependencies
         run: |
           echo "📦 Installing dependencies..."
-          if [ -f "./package-lock.json" ];then
-            echo "Using npm ci for faster, reliable installs"
-            npm ci
-          else
-            echo "Using npm install"
-            npm install
-          fi
+          npm ci
           echo "✅ Dependencies installed successfully"
-      
-      - name: Generate package-lock.json if missing
-        run: |
-          if [ ! -f "./package-lock.json" ];then
-            echo "📝 Generating package-lock.json..."
-            npm install --package-lock-only
-            echo "✅ package-lock.json generated successfully"
-          else
-            echo "✅ package-lock.json already exists"
-          fi
       
       - name: Check if package-lock.json changed
         id: git-check

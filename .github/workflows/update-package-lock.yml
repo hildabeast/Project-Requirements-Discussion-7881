@@ -20,8 +20,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          # FIXED: Remove the specific cache-dependency-path
-          cache: 'npm'
+          # FIXED: Disable caching initially
+          # cache: 'npm'
 
       - name: Verify package.json exists
         working-directory: ./
@@ -33,12 +33,13 @@ jobs:
           fi
           echo "package.json found successfully"
 
-      - name: Update dependencies and package-lock.json
+      - name: Generate and update package-lock.json
         working-directory: ./
         run: |
-          echo "Updating dependencies..."
+          echo "Updating dependencies and generating package-lock.json..."
           npm install
           echo "Dependencies updated successfully"
+          ls -la
 
       - name: Check if package-lock.json changed
         id: git-check

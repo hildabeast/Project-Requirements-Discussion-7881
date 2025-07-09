@@ -26,19 +26,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          # FIXED: Remove the specific cache-dependency-path
-          cache: 'npm'
+          # FIXED: Disable caching initially
+          # cache: 'npm'
+
+      - name: Generate package-lock.json first
+        working-directory: ./
+        run: |
+          echo "📝 Generating package-lock.json..."
+          npm install --package-lock-only
+          echo "✅ package-lock.json generated successfully"
+          ls -la
 
       - name: Install dependencies
         working-directory: ./
         run: |
-          if [ -f "./package-lock.json" ];then
-            echo "Installing dependencies with npm ci..."
-            npm ci
-          else
-            echo "Installing dependencies with npm install..."
-            npm install
-          fi
+          echo "📦 Installing dependencies..."
+          npm ci
+          echo "✅ Dependencies installed successfully"
 
       - name: Build project
         working-directory: ./
